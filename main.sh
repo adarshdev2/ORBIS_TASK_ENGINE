@@ -1,5 +1,5 @@
 #!/bin/bash
-# Orbis Task Engine - Main CLI
+# Orbis Task Engine - Main CLI 
 
 # Load utility functions (colors + DB + logger)
 source utils.sh
@@ -10,6 +10,10 @@ source utils.sh
 # Ensure modules directory exists
 [ ! -d modules ] && { echo -e "${RED}❌ 'modules/' folder not found. Please create it and add modules.${RESET}"; exit 1; }
 
+clear
+show_banner
+loading_animation
+
 # Display version info
 echo -e "${BLUE}Orbis Task Engine v1.0${RESET}"
 echo "Developed by MR ADARSH P"
@@ -17,18 +21,20 @@ sleep 2
 
 while true; do
     clear
-    echo -e "${BLUE}==== Orbis Task Engine CLI ====${RESET}"
+    show_banner
+   
     echo -e "${YELLOW}Select a module to run:${RESET}"
     echo "1) Disk Analyzer"
     echo "2) File Organizer"
     echo "3) Resource Monitor"
     echo "4) Task Manager"
     echo "5) System Cleaner"
-    echo "6) View Recent Logs"
-    echo "7) Exit"
+    echo "6) Boot Time Logger"
+    echo "7) View Recent Logs"
+    echo "8) Exit"
     echo
 
-    read -p "Enter choice [1-7]: " choice
+    read -p "Enter choice [1-8]: " choice
     echo
 
     case "$choice" in
@@ -37,14 +43,15 @@ while true; do
         3) MODULE_PATH="modules/resource_monitor.sh" ;;
         4) MODULE_PATH="modules/task_manager.sh" ;;
         5) MODULE_PATH="modules/system_cleaner.sh" ;;
-        6)
+        6) MODULE_PATH="modules/boot_time_logger.sh" ;;
+        7)
             read -p "How many recent logs to display? (default 10): " logcount
             logcount=${logcount:-10}
             show_logs "$logcount"
             read -p "Press Enter to return to the main menu..."
             continue
             ;;
-        7)
+        8)
             echo -e "${GREEN}Exiting Orbis Task Engine. Goodbye!${RESET}"
             log_event "System" "Exited Orbis Task Engine CLI" "INFO"
             exit 0
