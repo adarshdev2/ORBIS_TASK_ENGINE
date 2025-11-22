@@ -1,0 +1,60 @@
+[2025-10-03 11:29:44] [Task Manager] Listed top 10 CPU processes
+[2025-10-03 11:30:27] [Task Manager] Listed top 10 Memory processes
+[2025-10-03 11:31:06] [Task Manager] Searched for processes matching '7911'
+[2025-10-03 11:31:20] [Task Manager] Killed PID 7911
+[2025-10-03 11:31:35] [System] Executed module: modules/task_manager.sh
+[2025-10-03 11:38:15] [Task Manager] Listed top 10 CPU processes
+[2025-10-03 11:38:20] [Task Manager] Listed top 10 Memory processes
+[2025-10-03 11:38:45] [Task Manager] Searched for processes matching 'firefox'
+[2025-10-03 11:39:03] [Task Manager] Searched for processes matching '11281'
+[2025-10-03 11:43:26] [Task Manager] Listed top 10 CPU processes
+[2025-10-03 11:43:33] [Task Manager] Listed top 10 Memory processes
+[2025-10-03 11:43:52] [Task Manager] Listed top 10 CPU processes
+[2025-10-03 11:43:55] [Task Manager] Listed top 10 Memory processes
+[2025-10-03 11:44:22] [Task Manager] Searched for processes matching ''8097''
+[2025-10-03 11:44:48] [Task Manager] Killed PID 6508
+[2025-10-03 11:44:56] [System] Executed module: modules/task_manager.sh
+[2025-10-03 11:49:59] [INFO] [System Cleaner] System cleaned (cache/temp/logs)
+[2025-10-03 11:49:59] [INFO] [System] Executed module: modules/system_cleaner.sh
+[2025-10-03 11:57:47] [INFO] [System Cleaner] System cleaned (cache/temp/logs)
+[2025-10-03 11:57:48] [INFO] [System] Executed module: modules/system_cleaner.sh
+[2025-10-03 12:00:28] [INFO] [System Cleaner] System cleaned (cache/temp/logs)
+[2025-10-03 12:00:28] [INFO] [System] Executed module: modules/system_cleaner.sh
+[2025-10-06 03:32:56] [INFO] [Disk Analyzer] Displayed disk usage summary
+[2025-10-06 03:33:23] [INFO] [Disk Analyzer] Listed top 10 largest files in /home/programmer/OrbisTaskEngine/
+[2025-10-06 03:33:42] [INFO] [Disk Analyzer] Listed top 10 largest files in /home/programmer
+[2025-10-06 03:33:48] [INFO] [Disk Analyzer] Listed top 10 largest directories in /home/programmer/OrbisTaskEngine/
+[2025-11-09 12:14:50] [INFO] [Disk Analyzer] Displayed disk usage summary
+[2025-11-09 13:04:22] [INFO] [System Cleaner]  - success
+[2025-11-09 13:04:22] [INFO] [System] Executed module: modules/system_cleaner.sh
+[2025-11-09 13:08:20] [ERROR] [System Cleaner] Cleaning package cache... - failed
+[2025-11-09 13:09:53] [INFO] [System Cleaner] Package cache cleaned (was 9.5G)
+[2025-11-09 13:40:37] [INFO] [Disk Analyzer] Displayed disk usage summary
+[2025-11-09 13:45:22] [INFO] [Disk Analyzer] Listed top 10 largest files in /home/programmer/Desktop/OrbisTaskTestEngine/disk_analyzer/submod2/platform-tools/
+[2025-11-09 13:47:31] [INFO] [Disk Analyzer] Listed top 10 largest directories in /home/programmer/Desktop/OrbisTaskTestEngine/disk_analyzer/submod3/
+[2025-11-09 13:50:23] [INFO] [Disk Analyzer] Saved disk analysis report to db/disk_report_2025-11-09_13-50.txt
+[2025-11-09 13:56:39] [INFO] [Disk Analyzer] Saved disk analysis report to db/disk_report_2025-11-09_13-56.txt
+[2025-11-09 14:01:10] [INFO] [File Organizer] Organized 15 files in /home/programmer/Desktop/OrbisTaskTestEngine/file_organizer/modules/ (By Extension)
+[2025-11-09 14:01:10] [INFO] [System] Executed module: modules/file_organizer.sh
+[2025-11-09 14:01:41] [INFO] [File Organizer] Organized 15 files in /home/programmer/Desktop/OrbisTaskTestEngine/file_organizer/modules/ (By Date Modified)
+[2025-11-09 14:01:41] [INFO] [System] Executed module: modules/file_organizer.sh
+[2025-11-09 14:02:57] [INFO] [File Organizer] Organized 15 files in /home/programmer/Desktop/OrbisTaskTestEngine/file_organizer/modules/ (By File Size)
+[2025-11-09 14:02:57] [INFO] [System] Executed module: modules/file_organizer.sh
+[2025-11-09 14:03:49] [INFO] [File Organizer] Organized 7 files in /home/programmer/Warpinator/ (By File Size)
+[2025-11-09 14:03:49] [INFO] [System] Executed module: modules/file_organizer.sh
+[2025-11-09 14:53:17] [INFO] [System] Exited Orbis Task Engine CLI
+[2025-11-12 01:38:11] [INFO] [System Cleaner] user cache cleared (was 337M)
+[2025-11-12 01:38:13] [INFO] [System Cleaner] user trash cleared (was 16K)
+[2025-11-12 01:38:13] [INFO] [System Cleaner] Cache-only cleanup executed successfully
+[2025-11-12 01:38:14] [INFO] [System] Executed module: modules/system_cleaner.sh
+[2025-11-12 04:16:43] [INFO] [Boot Time Logger] Boot info recorded (Boot Time: 2025-11-12 03:15:49, Uptime: up 1 hour, 0 minute)
+[2025-11-12 04:16:47] [INFO] [System] Executed module: modules/boot_time_logger.sh
+[2025-11-12 04:16:58] [INFO] [System] Executed module: modules/boot_time_logger.sh
+[2025-11-12 04:17:24] [INFO] [Boot Time Logger] Viewed recent boot logs
+[2025-11-12 04:26:54] [INFO] [Boot Time Logger] Boot info recorded (Boot Time: 2025-11-12 03:15:49, Uptime: up 1 hour, 11 minutes)
+[2025-11-12 04:27:01] [INFO] [Boot Time Logger] Viewed last boot record
+[2025-11-12 04:27:12] [INFO] [Boot Time Logger] Viewed recent boot logs
+[2025-11-12 04:27:25] [INFO] [Boot Time Logger] Generated boot report: reports/boot_report_20251112_042725.txt
+[2025-11-12 04:27:33] [INFO] [Boot Time Logger] Exited Boot Time Logger
+[2025-11-12 04:27:33] [INFO] [System] Executed module: modules/boot_time_logger.sh
+[2025-11-19 01:36:35] [INFO] [Boot Time Logger] Boot info recorded (Boot Time: 2025-11-19 00:58:40, Uptime: up 37 minutes)
