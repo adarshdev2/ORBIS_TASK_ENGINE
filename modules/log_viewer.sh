@@ -1,4 +1,12 @@
 #!/bin/bash
+# ORBIS – Log Viewer
+
+# Load utilities (REQUIRED)
+source utils.sh
+
+DB_PATH="db/orbis_engine.db"
+REPORT_DIR="reports"
+mkdir -p "$REPORT_DIR"
 
 while true; do
     clear
@@ -15,45 +23,74 @@ while true; do
 
     read -p "Choose an option [1-5]: " choice
     case "$choice" in
+
         1)
             read -p "Number of recent logs (default 10): " n
             show_logs "${n:-10}"
             ;;
+
         2)
             read -p "Enter keyword to search: " kw
             clear
             echo "---- Search Logs ----"
-            sqlite3 db/orbis_engine.db "SELECT timestamp, level, module, message FROM logs WHERE message LIKE '%$kw%' ORDER BY id DESC;" | \
+            printf "%-20s %-8s %-20s %-s\n" "TIMESTAMP" "LEVEL" "MODULE" "MESSAGE"
+            echo "---------------------------------------------------------------"
+
+            sqlite3 "$DB_PATH" \
+            "SELECT timestamp, level, module, message FROM logs
+             WHERE message LIKE '%$kw%'
+             ORDER BY id DESC;" | \
             while IFS='|' read -r ts lvl mod msg; do
                 case "$lvl" in
-                    INFO) color="\e[32m" ;;
-                    WARN) color="\e[33m" ;;
-                    ERROR) color="\e[31m" ;;
-                    *) color="\e[0m" ;;
+                    INFO) color="$GREEN" ;;
+                    WARN) color="$YELLOW" ;;
+                    ERROR) color="$RED" ;;
+                    *) color="$RESET" ;;
                 esac
-                printf "%-20s ${color}%-8s\e[0m %-20s %-s\n" "$ts" "$lvl" "$mod" "$msg"
+                printf "%-20s ${color}%-8s${RESET} %-20s %-s\n" \
+                       "$ts" "$lvl" "$mod" "$msg"
             done
             ;;
+
         3)
             clear
             echo "---- Error Logs ----"
-            sqlite3 db/orbis_engine.db "SELECT timestamp, level, module, message FROM logs WHERE level='ERROR' ORDER BY id DESC;" | \
+            printf "%-20s %-8s %-20s %-s\n" "TIMESTAMP" "LEVEL" "MODULE" "MESSAGE"
+            echo "---------------------------------------------------------------"
+
+            sqlite3 "$DB_PATH" \
+            "SELECT timestamp, level, module, message FROM logs
+             WHERE level='ERROR'
+             ORDER BY id DESC;" | \
             while IFS='|' read -r ts lvl mod msg; do
-                printf "%-20s \e[31m%-8s\e[0m %-20s %-s\n" "$ts" "$lvl" "$mod" "$msg"
+                printf "%-20s ${RED}%-8s${RESET} %-20s %-s\n" \
+                       "$ts" "$lvl" "$mod" "$msg"
             done
             ;;
+
         4)
             read -p "Enter keyword to save: " kw
-            file="reports/log_search_$(date +%F_%H%M%S).txt"
-            sqlite3 db/orbis_engine.db "SELECT timestamp, level, module, message FROM logs WHERE message LIKE '%$kw%' ORDER BY id DESC;" > "$file"
-            echo "Search results saved at $file"
+            file="$REPORT_DIR/log_search_$(date +%F_%H%M%S).txt"
+
+            sqlite3 "$DB_PATH" \
+            "SELECT timestamp, level, module, message FROM logs
+             WHERE message LIKE '%$kw%'
+             ORDER BY id DESC;" > "$file"
+
+            echo -e "${GREEN}Search results saved at $file${RESET}"
             log_event "LogViewer" "Saved log search result: $file" "INFO"
             ;;
-        5) break ;;
-        *) echo "Invalid option." ;;
+
+        5)
+            log_event "LogViewer" "Exited Log Viewer module" "INFO"
+            break
+            ;;
+
+        *)
+            echo -e "${RED}Invalid option.${RESET}"
+            ;;
     esac
 
     echo
     read -p "Press Enter to continue..."
 done
-    
