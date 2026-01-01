@@ -5,9 +5,10 @@ source utils.sh
 BLUE="\033[1;34m"
 GREEN="\033[1;32m"
 YELLOW="\033[1;33m"
+RED="\033[1;31m"
 RESET="\033[0m"
 
-# ASCII animation function
+# === ASCII Spinner ===
 ascii_spinner() {
     local pid=$1
     local delay=0.1
@@ -21,55 +22,119 @@ ascii_spinner() {
     printf "\r      \r"
 }
 
-# Function to display size of a directory
-show_size() {
-    [ -e "$1" ] && du -sh "$1" 2>/dev/null | awk '{print $1}' || echo "0"
+# === Get directory size ===
+get_size() {
+    [ -d "$1" ] && du -sh "$1" 2>/dev/null | awk '{print $1}' || echo "0"
 }
 
-# Function to clean cache with ASCII animation
+# === Preview Mode (Unique Feature) ===
+preview_cache() {
+    local path=$1
+    local name=$2
+    local size=$(get_size "$path")
+
+    echo -e "${CYAN}$name${RESET}"
+    echo "Path : $path"
+    echo "Size : $size"
+    echo "---------------------------"
+}
+
+# === Clean Cache ===
 clean_cache() {
     local path=$1
-    local description=$2
-    local size=$(show_size "$path")
+    local name=$2
+    local size=$(get_size "$path")
 
-    if [ "$size" != "0" ]; then
-        echo -ne "${YELLOW}Cleaning $description (Size: $size)...${RESET}"
-        rm -rf "$path"/* 2>/dev/null &
-        pid=$!
-        ascii_spinner $pid
-        wait $pid
-        echo -e "${GREEN} Done!${RESET}"
-        log_event "System Cleaner" "$description cleared (was $size)"
-    else
-        echo -e "${GREEN}No $description to clean.${RESET}"
+    if [ "$size" = "0" ]; then
+        echo -e "${GREEN}No $name to clean.${RESET}"
+        return
+    fi
+
+    echo -ne "${YELLOW}Cleaning $name (Size: $size)...${RESET}"
+    rm -rf "$path"/* 2>/dev/null &
+    pid=$!
+    ascii_spinner $pid
+    wait $pid
+
+    echo -e "${GREEN} Done!${RESET}"
+    log_event "System Cleaner" "$name cleared (was $size)"
+}
+
+# === Sub-modules ===
+clean_user_cache() {
+    clean_cache "$HOME/.cache" "User Cache"
+}
+
+clean_thumbnail_cache() {
+    clean_cache "$HOME/.cache/thumbnails" "Thumbnail Cache"
+}
+
+clean_trash() {
+    clean_cache "$HOME/.local/share/Trash/files" "Trash"
+}
+
+clean_browser_cache() {
+    if [ -d ~/.mozilla/firefox ]; then
+        for profile in ~/.mozilla/firefox/*/cache2; do
+            clean_cache "$profile" "Firefox Cache ($(basename $(dirname "$profile")))"
+        done
+    fi
+
+    if [ -d ~/.cache/google-chrome ]; then
+        clean_cache ~/.cache/google-chrome "Chrome Cache"
     fi
 }
 
-echo -e "${BLUE}==== Welcome to Friendly System Cache Cleaner ====${RESET}"
-sleep 0.5
+# === Preview All ===
+preview_all() {
+    echo -e "${BLUE}--- Cache Preview (Dry Run) ---${RESET}"
+    preview_cache "$HOME/.cache" "User Cache"
+    preview_cache "$HOME/.cache/thumbnails" "Thumbnail Cache"
+    preview_cache "$HOME/.local/share/Trash/files" "Trash"
+    preview_cache "$HOME/.mozilla/firefox" "Firefox Cache"
+    preview_cache "$HOME/.cache/google-chrome" "Chrome Cache"
+}
 
-# === User cache cleanup ===
-clean_cache ~/.cache "user cache"
+# === Main Menu ===
+while true; do
+    clear
+    echo -e "${BLUE}=========================================${RESET}"
+    echo -e "${BLUE}   ORBIS – Advanced System Cache Cleaner ${RESET}"
+    echo -e "${BLUE}=========================================${RESET}"
+    echo
+    echo "1) Preview cache sizes (Dry Run)"
+    echo "2) Clean user cache"
+    echo "3) Clean thumbnail cache"
+    echo "4) Empty trash"
+    echo "5) Clean browser cache"
+    echo "6) Clean ALL caches"
+    echo "7) Back to main menu"
+    echo
 
-# === Thumbnail cache cleanup ===
-clean_cache ~/.cache/thumbnails "thumbnail cache"
+    read -p "Choose an option [1-7]: " choice
+    echo
 
-# === Trash cleanup ===
-clean_cache ~/.local/share/Trash "user trash"
+    case "$choice" in
+        1) preview_all ;;
+        2) clean_user_cache ;;
+        3) clean_thumbnail_cache ;;
+        4) clean_trash ;;
+        5) clean_browser_cache ;;
+        6)
+            clean_user_cache
+            clean_thumbnail_cache
+            clean_trash
+            clean_browser_cache
+            ;;
+        7)
+            log_event "System Cleaner" "Exited system cleaner module"
+            break
+            ;;
+        *)
+            echo -e "${RED}Invalid option.${RESET}"
+            ;;
+    esac
 
-# === Browser cache cleanup ===
-# Firefox
-if [ -d ~/.mozilla/firefox ]; then
-    for profile in ~/.mozilla/firefox/*/cache2; do
-        clean_cache "$profile" "Firefox cache for profile $(basename $(dirname $profile))"
-    done
-fi
-
-# Chrome/Chromium
-if [ -d ~/.cache/google-chrome ]; then
-    clean_cache ~/.cache/google-chrome "Chrome/Chromium cache"
-fi
-
-echo -e "${BLUE}===========================================${RESET}"
-echo -e "${GREEN}All cache cleaned! Your system feels lighter now 🙂${RESET}"
-log_event "System Cleaner" "Cache-only cleanup executed successfully"
+    echo
+    read -p "Press Enter to continue..."
+done
