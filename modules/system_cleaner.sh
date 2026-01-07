@@ -6,6 +6,7 @@ BLUE="\033[1;34m"
 GREEN="\033[1;32m"
 YELLOW="\033[1;33m"
 RED="\033[1;31m"
+CYAN="\033[1;36m"
 RESET="\033[0m"
 
 # === ASCII Spinner ===
@@ -13,10 +14,10 @@ ascii_spinner() {
     local pid=$1
     local delay=0.1
     local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
-    while kill -0 $pid 2>/dev/null; do
+    while kill -0 "$pid" 2>/dev/null; do
         for frame in "${frames[@]}"; do
             printf "\r[%s] " "$frame"
-            sleep $delay
+            sleep "$delay"
         done
     done
     printf "\r      \r"
@@ -27,11 +28,12 @@ get_size() {
     [ -d "$1" ] && du -sh "$1" 2>/dev/null | awk '{print $1}' || echo "0"
 }
 
-# === Preview Mode (Unique Feature) ===
+# === Preview Mode ===
 preview_cache() {
     local path=$1
     local name=$2
-    local size=$(get_size "$path")
+    local size
+    size=$(get_size "$path")
 
     echo -e "${CYAN}$name${RESET}"
     echo "Path : $path"
@@ -43,7 +45,8 @@ preview_cache() {
 clean_cache() {
     local path=$1
     local name=$2
-    local size=$(get_size "$path")
+    local size
+    size=$(get_size "$path")
 
     if [ "$size" = "0" ]; then
         echo -e "${GREEN}No $name to clean.${RESET}"
@@ -53,8 +56,8 @@ clean_cache() {
     echo -ne "${YELLOW}Cleaning $name (Size: $size)...${RESET}"
     rm -rf "$path"/* 2>/dev/null &
     pid=$!
-    ascii_spinner $pid
-    wait $pid
+    ascii_spinner "$pid"
+    wait "$pid"
 
     echo -e "${GREEN} Done!${RESET}"
     log_event "System Cleaner" "$name cleared (was $size)"
@@ -74,14 +77,16 @@ clean_trash() {
 }
 
 clean_browser_cache() {
-    if [ -d ~/.mozilla/firefox ]; then
-        for profile in ~/.mozilla/firefox/*/cache2; do
-            clean_cache "$profile" "Firefox Cache ($(basename $(dirname "$profile")))"
+    if [ -d "$HOME/.mozilla/firefox" ]; then
+        for profile in "$HOME/.mozilla/firefox"/*/cache2; do
+            [ -d "$profile" ] || continue
+            profile_name=$(basename "$(dirname "$profile")")
+            clean_cache "$profile" "Firefox Cache ($profile_name)"
         done
     fi
 
-    if [ -d ~/.cache/google-chrome ]; then
-        clean_cache ~/.cache/google-chrome "Chrome Cache"
+    if [ -d "$HOME/.cache/google-chrome" ]; then
+        clean_cache "$HOME/.cache/google-chrome" "Chrome Cache"
     fi
 }
 
@@ -111,7 +116,7 @@ while true; do
     echo "7) Back to main menu"
     echo
 
-    read -p "Choose an option [1-7]: " choice
+    read -rp "Choose an option [1-7]: " choice
     echo
 
     case "$choice" in
@@ -136,5 +141,5 @@ while true; do
     esac
 
     echo
-    read -p "Press Enter to continue..."
+    read -rp "Press Enter to continue..."
 done
