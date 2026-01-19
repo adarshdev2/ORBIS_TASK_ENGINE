@@ -1,8 +1,9 @@
-
 #!/bin/bash
 source utils.sh
 
 echo -e "${BLUE}==== Disk Analyzer (Flexible & Safe) ====${RESET}"
+
+last_scanned_dir=""
 
 while true; do
     echo ""
@@ -20,15 +21,20 @@ while true; do
             df -h
             log_event "Disk Analyzer" "Displayed disk usage summary"
             ;;
+
         2)
             read -p "Enter directory path (default: $HOME): " dir
             dir=${dir:-$HOME}
+
             if [ ! -d "$dir" ]; then
                 echo -e "${RED}Directory does not exist!${RESET}"
-                log_event "Disk Analyzer" "Failed top 10 files: $dir does not exist"
+                log_event "Disk Analyzer" "Failed top files scan: $dir does not exist"
                 continue
             fi
+
+            last_scanned_dir="$dir"
             files=$(ls -lSh "$dir" 2>/dev/null | grep '^-')
+
             if [ -z "$files" ]; then
                 echo -e "${YELLOW}No files found in $dir${RESET}"
                 log_event "Disk Analyzer" "No files found in $dir"
@@ -38,15 +44,20 @@ while true; do
                 log_event "Disk Analyzer" "Listed top 10 largest files in $dir"
             fi
             ;;
+
         3)
             read -p "Enter directory path (default: $HOME): " dir
             dir=${dir:-$HOME}
+
             if [ ! -d "$dir" ]; then
                 echo -e "${RED}Directory does not exist!${RESET}"
-                log_event "Disk Analyzer" "Failed top 10 directories: $dir does not exist"
+                log_event "Disk Analyzer" "Failed top directories scan: $dir does not exist"
                 continue
             fi
+
+            last_scanned_dir="$dir"
             dirs=$(du -sh "$dir"/* 2>/dev/null)
+
             if [ -z "$dirs" ]; then
                 echo -e "${YELLOW}No directories found in $dir${RESET}"
                 log_event "Disk Analyzer" "No directories found in $dir"
@@ -56,42 +67,63 @@ while true; do
                 log_event "Disk Analyzer" "Listed top 10 largest directories in $dir"
             fi
             ;;
+
         4)
-            report_file="db/disk_report_$(date +%F_%H-%M).txt"
+            report_dir="reports"
+            mkdir -p "$report_dir"
+
+            report_file="$report_dir/disk_report_$(date +%F_%H-%M-%S).txt"
             echo -e "${BLUE}Saving report...${RESET}"
+
             {
                 echo "==== Disk Analyzer Report ===="
-                echo "Date: $(date)"
+                echo "Generated on: $(date)"
                 echo ""
                 echo "Disk Usage Summary:"
                 df -h
                 echo ""
-                echo "Top 10 largest files in last scanned directory:"
-                files=$(ls -lSh "$dir" 2>/dev/null | grep '^-')
-                if [ -z "$files" ]; then
-                    echo "No files found in $dir"
+
+                if [ -z "$last_scanned_dir" ] || [ ! -d "$last_scanned_dir" ]; then
+                    echo "No directory was scanned before generating this report."
                 else
-                    echo "$files" | head -n 10
-                fi
-                echo ""
-                echo "Top 10 largest directories in last scanned directory:"
-                dirs=$(du -sh "$dir"/* 2>/dev/null)
-                if [ -z "$dirs" ]; then
-                    echo "No directories found in $dir"
-                else
-                    echo "$dirs" | sort -rh | head -n 10
+                    echo "Last Scanned Directory: $last_scanned_dir"
+                    echo ""
+
+                    echo "Top 10 Largest Files:"
+                    files=$(ls -lSh "$last_scanned_dir" 2>/dev/null | grep '^-')
+                    if [ -z "$files" ]; then
+                        echo "No files found."
+                    else
+                        echo "$files" | head -n 10
+                    fi
+
+                    echo ""
+                    echo "Top 10 Largest Directories:"
+                    dirs=$(du -sh "$last_scanned_dir"/* 2>/dev/null)
+                    if [ -z "$dirs" ]; then
+                        echo "No directories found."
+                    else
+                        echo "$dirs" | sort -rh | head -n 10
+                    fi
                 fi
             } > "$report_file"
+
             echo -e "${GREEN}Report saved to $report_file${RESET}"
-            log_event "Disk Analyzer" "Saved disk analysis report to $report_file"
+            log_event "Disk Analyzer" "Saved disk report to $report_file"
             ;;
+
         5)
             echo -e "${BLUE}==== Previous Disk Analyzer Logs ====${RESET}"
-            sqlite3 db/orbis_engine.db "SELECT id, timestamp, message FROM logs WHERE module='Disk Analyzer' ORDER BY id DESC LIMIT 20;"
+            sqlite3 db/orbis_engine.db \
+                "SELECT id, timestamp, message FROM logs 
+                 WHERE module='Disk Analyzer' 
+                 ORDER BY id DESC LIMIT 20;"
             ;;
+
         6)
             break
             ;;
+
         *)
             echo -e "${RED}Invalid choice${RESET}"
             ;;
