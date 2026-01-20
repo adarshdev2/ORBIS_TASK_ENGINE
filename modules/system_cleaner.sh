@@ -1,7 +1,7 @@
 #!/bin/bash
 source utils.sh
 
-# Colors
+# ================= COLORS =================
 BLUE="\033[1;34m"
 GREEN="\033[1;32m"
 YELLOW="\033[1;33m"
@@ -9,52 +9,65 @@ RED="\033[1;31m"
 CYAN="\033[1;36m"
 RESET="\033[0m"
 
-# === ASCII Spinner ===
+# ================= SPINNER =================
 ascii_spinner() {
     local pid=$1
-    local delay=0.1
     local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
     while kill -0 "$pid" 2>/dev/null; do
-        for frame in "${frames[@]}"; do
-            printf "\r[%s] " "$frame"
-            sleep "$delay"
+        for f in "${frames[@]}"; do
+            printf "\r[%s] " "$f"
+            sleep 0.1
         done
     done
     printf "\r      \r"
 }
 
-# === Get directory size ===
+# ================= SMART SIZE =================
 get_size() {
-    [ -d "$1" ] && du -sh "$1" 2>/dev/null | awk '{print $1}' || echo "0"
+    local path=$1
+
+    if [ ! -d "$path" ]; then
+        echo "0"
+        return
+    fi
+
+    local count
+    count=$(find "$path" -mindepth 1 2>/dev/null | wc -l)
+
+    if [ "$count" -eq 0 ]; then
+        echo "0"
+    else
+        du -sh "$path" 2>/dev/null | awk '{print $1}'
+    fi
 }
 
-# === Preview Mode ===
+# ================= PREVIEW =================
 preview_cache() {
     local path=$1
     local name=$2
-    local size
-    size=$(get_size "$path")
 
     echo -e "${CYAN}$name${RESET}"
     echo "Path : $path"
-    echo "Size : $size"
+    echo "Size : $(get_size "$path")"
     echo "---------------------------"
 }
 
-# === Clean Cache ===
+# ================= CLEAN CORE =================
 clean_cache() {
     local path=$1
     local name=$2
-    local size
-    size=$(get_size "$path")
 
-    if [ "$size" = "0" ]; then
+    if [ ! -d "$path" ] || [ "$(get_size "$path")" = "0" ]; then
         echo -e "${GREEN}No $name to clean.${RESET}"
         return
     fi
 
+    local size
+    size=$(get_size "$path")
+
     echo -ne "${YELLOW}Cleaning $name (Size: $size)...${RESET}"
-    rm -rf "$path"/* 2>/dev/null &
+
+    find "$path" -mindepth 1 -exec rm -rf {} + 2>/dev/null &
     pid=$!
     ascii_spinner "$pid"
     wait "$pid"
@@ -63,7 +76,7 @@ clean_cache() {
     log_event "System Cleaner" "$name cleared (was $size)"
 }
 
-# === Sub-modules ===
+# ================= MODULES =================
 clean_user_cache() {
     clean_cache "$HOME/.cache" "User Cache"
 }
@@ -73,34 +86,40 @@ clean_thumbnail_cache() {
 }
 
 clean_trash() {
-    clean_cache "$HOME/.local/share/Trash/files" "Trash"
+    clean_cache "$HOME/.local/share/Trash/files" "Trash Files"
+    clean_cache "$HOME/.local/share/Trash/info" "Trash Info"
 }
 
-clean_browser_cache() {
-    if [ -d "$HOME/.mozilla/firefox" ]; then
-        for profile in "$HOME/.mozilla/firefox"/*/cache2; do
-            [ -d "$profile" ] || continue
-            profile_name=$(basename "$(dirname "$profile")")
-            clean_cache "$profile" "Firefox Cache ($profile_name)"
-        done
+clean_firefox_cache() {
+    if [ ! -d "$HOME/.mozilla/firefox" ]; then
+        echo -e "${GREEN}Firefox not installed.${RESET}"
+        return
     fi
 
-    if [ -d "$HOME/.cache/google-chrome" ]; then
-        clean_cache "$HOME/.cache/google-chrome" "Chrome Cache"
-    fi
+    for profile in "$HOME/.mozilla/firefox"/*.default*; do
+        [ -d "$profile/cache2" ] || continue
+        pname=$(basename "$profile")
+        clean_cache "$profile/cache2" "Firefox Cache ($pname)"
+    done
 }
 
-# === Preview All ===
+# ================= PREVIEW ALL =================
 preview_all() {
     echo -e "${BLUE}--- Cache Preview (Dry Run) ---${RESET}"
+
     preview_cache "$HOME/.cache" "User Cache"
     preview_cache "$HOME/.cache/thumbnails" "Thumbnail Cache"
-    preview_cache "$HOME/.local/share/Trash/files" "Trash"
-    preview_cache "$HOME/.mozilla/firefox" "Firefox Cache"
-    preview_cache "$HOME/.cache/google-chrome" "Chrome Cache"
+    preview_cache "$HOME/.local/share/Trash/files" "Trash Files"
+    preview_cache "$HOME/.local/share/Trash/info" "Trash Info"
+
+    if [ -d "$HOME/.mozilla/firefox" ]; then
+        for profile in "$HOME/.mozilla/firefox"/*.default*; do
+            preview_cache "$profile/cache2" "Firefox Cache ($(basename "$profile"))"
+        done
+    fi
 }
 
-# === Main Menu ===
+# ================= MENU =================
 while true; do
     clear
     echo -e "${BLUE}=========================================${RESET}"
@@ -111,7 +130,7 @@ while true; do
     echo "2) Clean user cache"
     echo "3) Clean thumbnail cache"
     echo "4) Empty trash"
-    echo "5) Clean browser cache"
+    echo "5) Clean Firefox cache"
     echo "6) Clean ALL caches"
     echo "7) Back to main menu"
     echo
@@ -124,12 +143,12 @@ while true; do
         2) clean_user_cache ;;
         3) clean_thumbnail_cache ;;
         4) clean_trash ;;
-        5) clean_browser_cache ;;
+        5) clean_firefox_cache ;;
         6)
             clean_user_cache
             clean_thumbnail_cache
             clean_trash
-            clean_browser_cache
+            clean_firefox_cache
             ;;
         7)
             log_event "System Cleaner" "Exited system cleaner module"
