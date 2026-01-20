@@ -19,22 +19,35 @@ while true; do
 
     case $tchoice in
         1)
-            echo -e "${CYAN}Top 10 CPU consuming processes:${RESET}"
-            printf "%-8s %-8s %-8s %-s\n" "PID" "USER" "%CPU" "COMMAND"
-            ps -eo pid,user,%cpu,comm --sort=-%cpu | head -n 11 | tail -n 10
+            echo -e "${CYAN}Top 10 CPU Consuming Processes:${RESET}"
+            printf "%-8s %-12s %-8s %-25s\n" "PID" "USER" "%CPU" "COMMAND"
+            printf "%-8s %-12s %-8s %-25s\n" "--------" "------------" "------" "-------------------------"
+
+            ps -eo pid,user,%cpu,comm --sort=-%cpu | head -n 11 | tail -n 10 | \
+            awk '{ printf "%-8s %-12s %-8s %-25s\n", $1, $2, $3, $4 }'
+
             log_event "Task Manager" "Listed top 10 CPU processes"
             ;;
         2)
-            echo -e "${CYAN}Top 10 Memory consuming processes:${RESET}"
-            printf "%-8s %-8s %-8s %-s\n" "PID" "USER" "%MEM" "COMMAND"
-            ps -eo pid,user,%mem,comm --sort=-%mem | head -n 11 | tail -n 10
+            echo -e "${CYAN}Top 10 Memory Consuming Processes:${RESET}"
+            printf "%-8s %-12s %-8s %-25s\n" "PID" "USER" "%MEM" "COMMAND"
+            printf "%-8s %-12s %-8s %-25s\n" "--------" "------------" "------" "-------------------------"
+
+            ps -eo pid,user,%mem,comm --sort=-%mem | head -n 11 | tail -n 10 | \
+            awk '{ printf "%-8s %-12s %-8s %-25s\n", $1, $2, $3, $4 }'
+
             log_event "Task Manager" "Listed top 10 Memory processes"
             ;;
         3)
             read -p "Enter process name or pattern: " pname
-            echo -e "${CYAN}Matching processes:${RESET}"
-            printf "%-8s %-8s %-8s %-8s %-s\n" "PID" "USER" "%CPU" "%MEM" "COMMAND"
-            ps -eo pid,user,%cpu,%mem,comm | grep -i "$pname" | grep -v grep
+            echo -e "${CYAN}Matching Processes:${RESET}"
+
+            printf "%-8s %-12s %-8s %-8s %-25s\n" "PID" "USER" "%CPU" "%MEM" "COMMAND"
+            printf "%-8s %-12s %-8s %-8s %-25s\n" "--------" "------------" "------" "------" "-------------------------"
+
+            ps -eo pid,user,%cpu,%mem,comm | grep -i "$pname" | grep -v grep | \
+            awk '{ printf "%-8s %-12s %-8s %-8s %-25s\n", $1, $2, $3, $4, $5 }'
+
             log_event "Task Manager" "Searched for processes matching '$pname'"
             ;;
         4)
