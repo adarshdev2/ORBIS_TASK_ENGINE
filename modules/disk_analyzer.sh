@@ -114,10 +114,21 @@ while true; do
 
         5)
             echo -e "${BLUE}==== Previous Disk Analyzer Logs ====${RESET}"
-            sqlite3 db/orbis_engine.db \
+
+            # Print header
+            printf "%-5s %-20s %-50s\n" "ID" "TIMESTAMP" "MESSAGE"
+            printf "%-5s %-20s %-50s\n" "----" "--------------------" "--------------------------------------------------"
+
+            # Fetch logs and format
+            sqlite3 -separator "|" db/orbis_engine.db \
                 "SELECT id, timestamp, message FROM logs 
                  WHERE module='Disk Analyzer' 
-                 ORDER BY id DESC LIMIT 20;"
+                 ORDER BY id DESC LIMIT 20;" | \
+            awk -F"|" '{ 
+                printf "%-5s %-20s %-50s\n", $1, $2, substr($3,1,50)
+            }'
+
+            echo ""
             ;;
 
         6)
