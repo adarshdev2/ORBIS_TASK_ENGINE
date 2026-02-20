@@ -20,36 +20,67 @@ while true; do
         1)
             clear
             echo "---- Network Summary ----"
-            printf "%-12s %-20s %-12s\n" "INTERFACE" "IP ADDRESS" "STATE"
-            echo "------------------------------------------------"
-            ip -br addr | awk '{printf "%-12s %-20s %-12s\n",$1,$3,$2}'
+            printf "+------------+----------------------+------------+\n"
+            printf "| %-10s | %-20s | %-10s |\n" "INTERFACE" "IP ADDRESS" "STATE"
+            printf "+------------+----------------------+------------+\n"
+            ip -br addr | awk '{printf "| %-10s | %-20s | %-10s |\n",$1,$3,$2}'
+            printf "+------------+----------------------+------------+\n"
             ;;
+
         2)
             clear
             echo "---- Active Internet Connections ----"
-            printf "%-6s %-22s %-22s %-10s\n" "PROTO" "LOCAL ADDRESS" "REMOTE ADDRESS" "STATE"
-            echo "---------------------------------------------------------------------"
+            printf "+--------+------------------------+------------------------+------------+\n"
+            printf "| %-6s | %-22s | %-22s | %-10s |\n" "PROTO" "LOCAL ADDRESS" "REMOTE ADDRESS" "STATE"
+            printf "+--------+------------------------+------------------------+------------+\n"
             ss -tun | awk 'NR>1 {
                 state=$2
                 if(state=="ESTAB") color="\033[32m"
                 else if(state=="CLOSE-WAIT") color="\033[31m"
                 else color="\033[0m"
-                printf "%-6s %-22s %-22s ${color}%-10s\033[0m\n",$1,$5,$6,$2
+                
+                local=$5
+                remote=$6
+                if(length(local)>22) local=substr(local,1,22)
+                if(length(remote)>22) remote=substr(remote,1,22)
+                printf "| %-6s | %-22s | %-22s | %s%-10s\033[0m |\n",$1,local,remote,color,$2
             }' | head -20
+            printf "+--------+------------------------+------------------------+------------+\n"
             ;;
+
         3)
             clear
             echo "---- Network Interface Usage (MB) ----"
-            printf "%-12s %-15s %-15s\n" "INTERFACE" "RECEIVED" "SENT"
-            echo "------------------------------------------------"
-            awk 'NR>2 {rx=$2/1024/1024; tx=$10/1024/1024; printf "%-12s %-15.2f %-15.2f\n",$1,rx,tx}' /proc/net/dev | sed 's/://'
+            printf "+------------+-----------------+-----------------+\n"
+            printf "| %-10s | %-15s | %-15s |\n" "INTERFACE" "RECEIVED" "SENT"
+            printf "+------------+-----------------+-----------------+\n"
+            awk 'NR>2 {
+                rx=$2/1024/1024
+                tx=$10/1024/1024
+                gsub(":", "", $1)
+                printf "| %-10s | %-15.2f | %-15.2f |\n",$1,rx,tx
+            }' /proc/net/dev
+            printf "+------------+-----------------+-----------------+\n"
             ;;
+
         4)
             file="$REPORT_DIR/network_usage_$(date +%F_%H%M%S).txt"
-            awk 'NR>2 {rx=$2/1024/1024; tx=$10/1024/1024; printf "%-12s %-15.2f %-15.2f\n",$1,rx,tx}' /proc/net/dev | sed 's/://' > "$file"
+            {
+                printf "+------------+-----------------+-----------------+\n"
+                printf "| %-10s | %-15s | %-15s |\n" "INTERFACE" "RECEIVED" "SENT"
+                printf "+------------+-----------------+-----------------+\n"
+                awk 'NR>2 {
+                    rx=$2/1024/1024
+                    tx=$10/1024/1024
+                    gsub(":", "", $1)
+                    printf "| %-10s | %-15.2f | %-15.2f |\n",$1,rx,tx
+                }' /proc/net/dev
+                printf "+------------+-----------------+-----------------+\n"
+            } > "$file"
             echo "Network usage report saved at $file"
             log_event "NetworkUsageViewer" "Saved report: $file" "INFO"
             ;;
+
         5) break ;;
         *) echo "Invalid option." ;;
     esac

@@ -15,7 +15,7 @@ while true; do
     echo -e "${YELLOW}Select an action:${RESET}"
     echo "1) Log current boot info"
     echo "2) View last boot record"
-    echo "3) Show recent boot logs (journalctl)"
+    echo "3) Show recent boot logs (Structured Table)"
     echo "4) Generate detailed boot report"
     echo "5) Return to main menu"
     echo
@@ -26,6 +26,7 @@ while true; do
     case "$sub_choice" in
         1)
             echo -e "${BLUE}Collecting current boot information...${RESET}"
+
             BOOT_TIME=$(uptime -s)
             UP_TIME=$(uptime -p)
             KERNEL=$(uname -r)
@@ -52,19 +53,52 @@ while true; do
             while IFS='|' read -r ts msg; do
                 echo -e "${CYAN}$ts${RESET} → ${WHITE}$msg${RESET}"
             done
+
             log_event "$MODULE_NAME" "Viewed last boot record" "INFO"
             ;;
 
         3)
-            echo -e "${YELLOW}Showing latest boot log entries (journalctl)...${RESET}"
+            echo -e "${YELLOW}Showing latest boot log entries (Structured Table View)...${RESET}"
             echo
-            sudo journalctl -b | tail -n 20
+
+            # Table Header
+            printf "%-12s | %-8s | %-25s | %s\n" "DATE" "TIME" "SERVICE" "MESSAGE"
+            printf "%-12s-+-%-8s-+-%-25s-+-%s\n" \
+            "------------" \
+            "--------" \
+            "-------------------------" \
+            "--------------------------------------------------------------"
+
+            # Fetch logs without hint message
+            journalctl -b -n 20 --no-pager -q -o short-iso | \
+            while read -r line; do
+
+                # Extract date (YYYY-MM-DD)
+                date=$(echo "$line" | awk '{print substr($1,1,10)}')
+
+                # Extract time (HH:MM:SS)
+                time=$(echo "$line" | awk '{print substr($1,12,8)}')
+
+                # Extract service name (remove colon)
+                service=$(echo "$line" | awk '{print $3}' | sed 's/://')
+
+                # Extract full message after service
+                message=$(echo "$line" | cut -d' ' -f4-)
+
+                # Print aligned row
+                printf "%-12s | %-8s | %-25s | %s\n" \
+                "$date" "$time" "$service" "$message"
+
+            done
+
             echo
-            log_event "$MODULE_NAME" "Viewed recent boot logs" "INFO"
+            log_event "$MODULE_NAME" "Viewed structured recent boot logs" "INFO"
             ;;
 
         4)
             echo -e "${BLUE}Generating detailed boot report...${RESET}"
+
+            mkdir -p reports
             REPORT_PATH="reports/boot_report_$(date +%Y%m%d_%H%M%S).txt"
 
             {
