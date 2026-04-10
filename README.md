@@ -7,6 +7,7 @@ A lightweight, modular CLI-based automation tool for efficient system administra
 Orbis Task Engine (OTE) automates system tasks like monitoring, logging, scheduling, and maintenance using Bash scripting and SQLite, providing a centralized and efficient management system.
 
 ✨ Features
+
 🔍 Disk usage analysis
 📂 File organization
 📊 Real-time system monitoring
@@ -24,12 +25,14 @@ OS: Linux (BOSS / Arch)
 Tools: Cron
 
 🚀 Setup
+
 git clone https://github.com/your-username/orbis-task-engine.git
 cd orbis-task-engine
 chmod +x main.sh
 ./main.sh
 
 📊 Modules
+
 Disk Analyzer
 File Organizer
 Resource Monitor
@@ -42,16 +45,19 @@ App Tracker
 Log Viewer
 
 📈 Advantages
+
 Reduces manual effort
 Centralized logging
 Automated scheduling
 Lightweight & efficient
 
 🔮 Future Scope
+
 GUI
 Web version
 Cloud integration
 AI-based monitoring
+
 👨‍💻 Author
 
 Adarsh P
