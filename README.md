@@ -16,24 +16,6 @@ Orbis Task Engine (OTE) automates system tasks like monitoring, logging, schedul
 🗂️ Centralized logging
 📜 Log viewing & filtering
 
-🏗️ Project Structure
-Orbis-Task-Engine/
-│── main.sh
-│── utils.sh
-│── modules/
-│   ├── disk_analyzer.sh
-│   ├── file_organizer.sh
-│   ├── resource_monitor.sh
-│   ├── task_manager.sh
-│   ├── system_cleaner.sh
-│   ├── boot_time_logger.sh
-│   ├── scheduled_task_runner.sh
-│   ├── network_usage_viewer.sh
-│   ├── app_usage_tracker.sh
-│   └── log_viewer.sh
-│── db/orbis_engine.db
-│── config/config.cfg
-
 ⚙️ Tech Stack
 Language: Bash
 Database: SQLite3
